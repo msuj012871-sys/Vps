@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>ULTIMATE PANEL</title>
+  <style>
+    body { background:#0d1117; color:white; font-family:sans-serif; }
+    .box { border:1px solid #333; margin:10px; padding:10px; }
+    button { margin:5px; padding:8px; }
+  </style>
+</head>
+<body>
+
+<h2>🔥 ULTIMATE VPS PANEL</h2>
+
+<h3>Upload Bot</h3>
+<input type="text" id="name" placeholder="Bot name (V1)">
+<input type="file" id="file">
+<button onclick="upload()">Upload</button>
+
+<h3>Servers</h3>
+<div id="servers"></div>
+
+<h3>Logs</h3>
+<div id="logs"></div>
+
+<script>
+function loadBots(){
+  fetch('/bots')
+  .then(r=>r.json())
+  .then(data=>{
+    let html='';
+    data.forEach(b=>{
+      html += `<div class="box">
+        <b>${b}</b><br>
+        <button onclick="start('${b}')">Start</button>
+        <button onclick="stop('${b}')">Stop</button>
+        <button onclick="logs('${b}')">Logs</button>
+      </div>`;
+    });
+    document.getElementById("servers").innerHTML = html;
+  });
+}
+
+function start(n){ fetch('/start/'+n,{method:'POST'}) }
+function stop(n){ fetch('/stop/'+n,{method:'POST'}) }
+
+function logs(n){
+  fetch('/logs/'+n)
+  .then(r=>r.json())
+  .then(d=>{
+    document.getElementById("logs").innerHTML = d.join("<br>");
+  });
+}
+
+function upload(){
+  const name = document.getElementById("name").value;
+  const file = document.getElementById("file").files[0];
+
+  const formData = new FormData();
+  formData.append("name", name);
+  formData.append("file", file);
+
+  fetch('/upload', {method:'POST', body:formData})
+  .then(()=> loadBots());
+}
+
+loadBots();
+</script>
+
+</body>
+</html>
